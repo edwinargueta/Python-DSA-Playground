@@ -5,13 +5,17 @@ Run from inside this directory:
     python3 -m unittest test_bst -v
     python3 test_bst.py            # equivalent
 
-Every test fails with NotImplementedError until the corresponding method is
-written - that is the intended starting point. Work down the file and make
-them pass one at a time.
+Each test class depends only on the method it names, so you can implement the
+methods in any order and a green class always means that method is done.
+Tests for insert and delete check structure with the walk_in_order and is_bst
+helpers below instead of calling the traversal methods.
 
-These tests exercise the public API only. They never inspect .left, .right or
-._size directly, so any correct implementation satisfies them regardless of
-whether you go recursive or iterative.
+The one deliberate exception is TestDunders: __iter__ delegates to in_order by
+design, so two of its tests stay red until in_order is written.
+
+Assertions reach .left and .right only through those helpers, and never
+require a particular implementation strategy - recursive and iterative
+solutions both satisfy them.
 """
 
 from __future__ import annotations
@@ -28,6 +32,28 @@ def build(values) -> BinarySearchTree:
     for v in values:
         bst.insert(v)
     return bst
+
+
+def walk_in_order(node) -> list:
+    """Collect values left to right by walking the nodes directly.
+
+    Lets the insert and delete tests verify tree shape without depending on
+    in_order() being written yet.
+    """
+    if node is None:
+        return []
+    return walk_in_order(node.left) + [node.value] + walk_in_order(node.right)
+
+
+def is_bst(node, low=None, high=None) -> bool:
+    """Check the BST ordering property by walking the nodes directly."""
+    if node is None:
+        return True
+    if low is not None and node.value <= low:
+        return False
+    if high is not None and node.value >= high:
+        return False
+    return is_bst(node.left, low, node.value) and is_bst(node.right, node.value, high)
 
 
 # A balanced tree used throughout:
@@ -101,11 +127,11 @@ class TestInsert(unittest.TestCase):
     def test_duplicates_do_not_grow_the_tree(self) -> None:
         bst = build([50, 30, 70, 50, 30, 70])
         self.assertEqual(len(bst), 3)
-        self.assertEqual(bst.in_order(), [30, 50, 70])
+        self.assertEqual(walk_in_order(bst.root), [30, 50, 70])
 
     def test_maintains_ordering(self) -> None:
         bst = build([50, 30, 70, 20, 40])
-        self.assertEqual(bst.in_order(), [20, 30, 40, 50, 70])
+        self.assertEqual(walk_in_order(bst.root), [20, 30, 40, 50, 70])
 
 
 class TestContains(unittest.TestCase):
@@ -141,45 +167,45 @@ class TestDelete(unittest.TestCase):
     def test_leaf(self) -> None:
         bst = build(BALANCED)
         self.assertTrue(bst.delete(20))
-        self.assertEqual(bst.in_order(), [30, 40, 50, 60, 70, 80])
+        self.assertEqual(walk_in_order(bst.root), [30, 40, 50, 60, 70, 80])
         self.assertEqual(len(bst), 6)
 
     def test_node_with_only_left_child(self) -> None:
         bst = build([50, 30, 20])
         self.assertTrue(bst.delete(30))
-        self.assertEqual(bst.in_order(), [20, 50])
-        self.assertTrue(bst.is_valid_bst())
+        self.assertEqual(walk_in_order(bst.root), [20, 50])
+        self.assertTrue(is_bst(bst.root))
 
     def test_node_with_only_right_child(self) -> None:
         bst = build([50, 30, 40])
         self.assertTrue(bst.delete(30))
-        self.assertEqual(bst.in_order(), [40, 50])
-        self.assertTrue(bst.is_valid_bst())
+        self.assertEqual(walk_in_order(bst.root), [40, 50])
+        self.assertTrue(is_bst(bst.root))
 
     def test_node_with_two_children(self) -> None:
         bst = build(BALANCED)
         self.assertTrue(bst.delete(30))
-        self.assertEqual(bst.in_order(), [20, 40, 50, 60, 70, 80])
-        self.assertTrue(bst.is_valid_bst())
+        self.assertEqual(walk_in_order(bst.root), [20, 40, 50, 60, 70, 80])
+        self.assertTrue(is_bst(bst.root))
 
     def test_root_when_only_node(self) -> None:
         bst = build([50])
         self.assertTrue(bst.delete(50))
         self.assertIsNone(bst.root)
         self.assertEqual(len(bst), 0)
-        self.assertEqual(bst.in_order(), [])
+        self.assertEqual(walk_in_order(bst.root), [])
 
     def test_root_with_one_child(self) -> None:
         bst = build([50, 30])
         self.assertTrue(bst.delete(50))
-        self.assertEqual(bst.in_order(), [30])
+        self.assertEqual(walk_in_order(bst.root), [30])
         self.assertEqual(bst.root.value, 30)
 
     def test_root_with_two_children(self) -> None:
         bst = build(BALANCED)
         self.assertTrue(bst.delete(50))
-        self.assertEqual(bst.in_order(), [20, 30, 40, 60, 70, 80])
-        self.assertTrue(bst.is_valid_bst())
+        self.assertEqual(walk_in_order(bst.root), [20, 30, 40, 60, 70, 80])
+        self.assertTrue(is_bst(bst.root))
         self.assertNotEqual(bst.root.value, 50)
 
     def test_deleting_everything_empties_the_tree(self) -> None:
@@ -193,15 +219,15 @@ class TestDelete(unittest.TestCase):
         for target in BALANCED:
             bst = build(BALANCED)
             bst.delete(target)
-            self.assertTrue(bst.is_valid_bst(), f"invalid after deleting {target}")
+            self.assertTrue(is_bst(bst.root), f"invalid after deleting {target}")
             expected = sorted(v for v in BALANCED if v != target)
-            self.assertEqual(bst.in_order(), expected)
+            self.assertEqual(walk_in_order(bst.root), expected)
 
     def test_reinsert_after_delete(self) -> None:
         bst = build(BALANCED)
         bst.delete(30)
         self.assertTrue(bst.insert(30))
-        self.assertEqual(bst.in_order(), sorted(BALANCED))
+        self.assertEqual(walk_in_order(bst.root), sorted(BALANCED))
         self.assertEqual(len(bst), len(BALANCED))
 
 
