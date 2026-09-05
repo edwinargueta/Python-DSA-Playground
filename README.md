@@ -50,6 +50,14 @@ The constraints are the point — they're what make this practice rather than re
 
 ---
 
+## Engineering Workflow & AI Acceleration
+
+To maximize implementation speed while maintaining strict code quality:
+* **Core Architecture & Logic:** Designed and implemented manually from first principles.
+* **Test Case Generation:** Standard assertions and edge-case suites (e.g., boundary conditions, random tree insertion sequences) were generated using Claude and verified against manual invariants.
+
+---
+
 ## Repository structure
 
 Each top-level folder is one self-contained data structure or algorithm family, with
