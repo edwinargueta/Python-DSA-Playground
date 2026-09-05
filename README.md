@@ -97,16 +97,120 @@ Each module includes a `__main__` block demonstrating its structure in use.
 
 ---
 
-## Complexity reference
+## Big-O complexity reference
 
-Target complexities for the operations implemented here:
+Quick reference for the structures and algorithms covered in this repo.
+`n` = number of elements, `V` = vertices, `E` = edges, `k` = value range,
+`d` = number of digits, `m` = key length.
+
+### Data structures
+
+Average case, with worst case noted where it differs materially:
 
 | Structure | Access | Search | Insert | Delete | Space |
 |---|---|---|---|---|---|
-| Binary Search Tree (avg) | O(log n) | O(log n) | O(log n) | O(log n) | O(n) |
-| Binary Search Tree (worst) | O(n) | O(n) | O(n) | O(n) | O(n) |
-| Hash Table | — | O(1) | O(1) | O(1) | O(n) |
-| Heap | O(1) peek | O(n) | O(log n) | O(log n) | O(n) |
+| Array (static) | O(1) | O(n) | O(n) | O(n) | O(n) |
+| Dynamic array (`list`) | O(1) | O(n) | O(1)* / O(n) | O(n) | O(n) |
+| Singly linked list | O(n) | O(n) | O(1)† | O(1)† | O(n) |
+| Doubly linked list | O(n) | O(n) | O(1)† | O(1)† | O(n) |
+| Stack | O(n) | O(n) | O(1) | O(1) | O(n) |
+| Queue | O(n) | O(n) | O(1) | O(1) | O(n) |
+| Hash table | — | O(1) | O(1) | O(1) | O(n) |
+| Binary search tree | O(log n) | O(log n) | O(log n) | O(log n) | O(n) |
+| Balanced BST (AVL, red-black) | O(log n) | O(log n) | O(log n) | O(log n) | O(n) |
+| Binary heap | O(1)‡ | O(n) | O(log n) | O(log n) | O(n) |
+| Trie | — | O(m) | O(m) | O(m) | O(n·m) |
+
+\* Amortized for append; O(n) for arbitrary-position insert or a resize.
+† At the head, or at a node you already hold a reference to; O(n) if you must find it first.
+‡ Peek at min/max only — arbitrary access is O(n).
+
+**Worst cases that matter:**
+
+| Structure | Degrades to | Trigger |
+|---|---|---|
+| Hash table | O(n) per operation | Every key colliding into one bucket |
+| Binary search tree | O(n) per operation | Sorted or near-sorted insertion order |
+| Balanced BST | O(log n) — no degradation | Rebalancing is the guarantee |
+
+### Sorting algorithms
+
+| Algorithm | Best | Average | Worst | Space | Stable |
+|---|---|---|---|---|---|
+| Bubble sort | O(n) | O(n²) | O(n²) | O(1) | Yes |
+| Insertion sort | O(n) | O(n²) | O(n²) | O(1) | Yes |
+| Selection sort | O(n²) | O(n²) | O(n²) | O(1) | No |
+| Merge sort | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes |
+| Quicksort | O(n log n) | O(n log n) | O(n²) | O(log n) | No |
+| Heapsort | O(n log n) | O(n log n) | O(n log n) | O(1) | No |
+| Counting sort | O(n + k) | O(n + k) | O(n + k) | O(k) | Yes |
+| Radix sort | O(d(n + k)) | O(d(n + k)) | O(d(n + k)) | O(n + k) | Yes |
+| Timsort (`sorted`) | O(n) | O(n log n) | O(n log n) | O(n) | Yes |
+
+*Stable* means equal elements keep their original relative order — which matters
+whenever you sort by one key after already sorting by another.
+
+### Graph algorithms
+
+| Algorithm | Time | Space | Notes |
+|---|---|---|---|
+| BFS | O(V + E) | O(V) | Shortest path on unweighted graphs |
+| DFS | O(V + E) | O(V) | Cycle detection, connected components |
+| Topological sort | O(V + E) | O(V) | DAGs only |
+| Dijkstra (binary heap) | O((V + E) log V) | O(V) | No negative edge weights |
+| Bellman-Ford | O(V·E) | O(V) | Handles negative edges; detects negative cycles |
+| Floyd-Warshall | O(V³) | O(V²) | All-pairs shortest paths |
+| Union-Find | O(α(n)) amortized | O(V) | With path compression and union by rank |
+
+α(n) is the inverse Ackermann function — under 5 for any input size that fits in
+memory, so effectively constant.
+
+### Graph representations
+
+| Representation | Space | Edge lookup | Iterate neighbors |
+|---|---|---|---|
+| Adjacency list | O(V + E) | O(degree) | O(degree) |
+| Adjacency matrix | O(V²) | O(1) | O(V) |
+
+Adjacency lists win for sparse graphs, which is most real-world graphs. Matrices are
+worth it only when the graph is dense or you need constant-time edge queries.
+
+### Python-specific costs
+
+Worth internalizing, since these are where idiomatic-looking Python quietly goes
+quadratic:
+
+| Operation | Complexity | Note |
+|---|---|---|
+| `x in list` | O(n) | Linear scan |
+| `x in set` / `x in dict` | O(1) | Hash lookup — the usual fix for the above |
+| `list.append(x)` | O(1) amortized | Occasional O(n) resize |
+| `list.insert(0, x)` | O(n) | Shifts every element |
+| `list.pop()` | O(1) | From the end |
+| `list.pop(0)` | O(n) | Shifts every element |
+| `str += s` in a loop | O(n²) | Strings are immutable — use `"".join()` |
+| `sorted(iterable)` | O(n log n) | Timsort; near-linear on partially sorted input |
+
+The classic bug is an `x in list` check inside a loop over the same list — it reads as
+O(n) and runs as O(n²). Swapping the list for a set is usually the whole fix.
+
+---
+
+## Choosing the right structure
+
+Complexity tables answer *how fast*; this answers *which one*:
+
+| Requirement | Structure | Why |
+|---|---|---|
+| Key/value lookup by exact key | Hash table | O(1) average |
+| Sorted order maintained | Balanced BST | O(log n) ops, in-order traversal is sorted |
+| Always need the min or max | Heap | O(1) peek, O(log n) extract |
+| LIFO | Stack | Natural fit |
+| FIFO | Queue | Natural fit |
+| Prefix / autocomplete search | Trie | O(m) in key length, not collection size |
+| Frequent insert/delete at ends | Doubly linked list | O(1) at both ends |
+| Index-based access | Dynamic array | O(1) random access |
 
 The gap between a BST's average and worst case is the entire argument for
-self-balancing trees — an unbalanced BST fed sorted input degrades into a linked list.
+self-balancing trees — an unbalanced BST fed sorted input degrades into a linked list,
+and O(log n) silently becomes O(n).
