@@ -56,7 +56,22 @@ class SinglyLinkedList:
 
     def insert(self, index: int, value: Any) -> bool:
         """Insert value at index 0..len; False if invalid. O(n) time, O(1) space."""
-        raise NotImplementedError
+        if index < 0 or index > self._size:
+            return False
+        if index == 0:
+            self.prepend(value)
+            return True
+        if index == self._size:
+            self.append(value)
+            return True
+        currPointer = self.head
+        for _ in range(index - 1):
+            currPointer = currPointer.next
+        newNode = Node(value)
+        newNode.next = currPointer.next
+        currPointer.next = newNode
+        self._size += 1
+        return True
 
     def print_list(self) -> None:
         """Print the values in the list from head to tail. O(n) time, O(1) space."""
@@ -70,7 +85,14 @@ class SinglyLinkedList:
 
     def pop_first(self) -> Any:
         """Remove and return the head; IndexError if empty. O(1) time, O(1) space."""
-        raise NotImplementedError
+        if self._size == 0:
+            raise IndexError("pop from empty list")
+        currPointer = self.head
+        self.head = currPointer.next
+        if not self.head:
+            self.tail = None
+        self._size -= 1
+        return currPointer.value
 
     def pop(self) -> Any:
         """Remove and return the tail; IndexError if empty. O(n) time, O(1) space."""
@@ -91,25 +113,61 @@ class SinglyLinkedList:
 
     def remove(self, index: int) -> Any:
         """Remove the node at index and return its value. O(n) time, O(1) space."""
-        raise NotImplementedError
+        if index < 0 or index >= self._size:
+            raise IndexError("index out of range")
+        if index == 0:
+            return self.pop_first()
+        currPointer = self.get(index - 1)
+        removedNode = currPointer.next
+        currPointer.next = removedNode.next
+        if removedNode == self.tail:
+            self.tail = currPointer
+        self._size -= 1
+        return removedNode.value
 
     def remove_value(self, value: Any) -> bool:
         """Remove the first match; True if one was removed. O(n) time, O(1) space."""
-        raise NotImplementedError
+        currPointer = self.head
+        prevPointer = None
+        while currPointer:
+            if currPointer.value == value:
+                if prevPointer:
+                    prevPointer.next = currPointer.next
+                else:
+                    self.head = currPointer.next
+                if currPointer == self.tail:
+                    self.tail = prevPointer
+                self._size -= 1
+                return True
+            prevPointer = currPointer
+            currPointer = currPointer.next
+        return False
 
     def clear(self) -> None:
         """Remove every node, returning to the empty state. O(1) time, O(1) space."""
-        raise NotImplementedError
+        self.head = None
+        self.tail = None
+        self._size = 0
 
     # --- reading ---------------------------------------------------------
 
     def get(self, index: int) -> Any:
         """Return the value at index; IndexError if invalid. O(n) time, O(1) space."""
-        raise NotImplementedError
+        if index < 0 or index >= self._size:
+            raise IndexError("index out of range")
+        currPointer = self.head
+        for _ in range(index):
+            currPointer = currPointer.next
+        return currPointer.value
 
     def set_value(self, index: int, value: Any) -> bool:
         """Overwrite the value at index; False if invalid. O(n) time, O(1) space."""
-        raise NotImplementedError
+        try:
+            node = self.get(index)
+            node.value = value
+            return True
+        except IndexError:
+            return False
 
     def index_of(self, value: Any) -> int:
         """Return the first index holding value, or -1. O(n) time, O(1) space."""
@@ -127,7 +185,16 @@ class SinglyLinkedList:
 
     def reverse(self) -> None:
         """Reverse in place, swapping head and tail. O(n) time, O(1) space."""
-        raise NotImplementedError
+        temp = self.head
+        self.head = self.tail
+        self.tail = temp
+        prevPointer = None
+        while temp:
+            nextPointer = temp.next
+            temp.next = prevPointer
+            prevPointer = temp
+            temp = nextPointer
+
 
     def find_middle(self) -> Any:
         """Return the middle value, later one when even. O(n) time, O(1) space."""
