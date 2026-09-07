@@ -33,15 +33,38 @@ class SinglyLinkedList:
 
     def append(self, value: Any) -> None:
         """Add value to the end of the list. O(1) time, O(1) space."""
-        raise NotImplementedError
+        newNode = Node(value)
+        if self.tail:
+            self.tail.next = newNode
+        self.tail = newNode
+        # If the list was empty, set the head to the new node as well.
+        if not self.head:
+            self.head = newNode
+        self._size += 1
+
 
     def prepend(self, value: Any) -> None:
         """Add value to the front of the list. O(1) time, O(1) space."""
-        raise NotImplementedError
+        newNode = Node(value)
+        if self.head:
+            newNode.next = self.head
+        self.head = newNode
+        # If the list was empty, set the tail to the new node as well.
+        if not self.tail:
+            self.tail = newNode
+        self._size += 1
 
     def insert(self, index: int, value: Any) -> bool:
         """Insert value at index 0..len; False if invalid. O(n) time, O(1) space."""
         raise NotImplementedError
+
+    def print_list(self) -> None:
+        """Print the values in the list from head to tail. O(n) time, O(1) space."""
+        currPointer = self.head
+        while currPointer:
+            print(currPointer.value, end=" -> ")
+            currPointer = currPointer.next
+        print("None")
 
     # --- removing --------------------------------------------------------
 
@@ -51,7 +74,20 @@ class SinglyLinkedList:
 
     def pop(self) -> Any:
         """Remove and return the tail; IndexError if empty. O(n) time, O(1) space."""
-        raise NotImplementedError
+        if self._size == 0:
+            raise IndexError("pop from empty list")
+        currPointer = self.head
+        prevPointer = None
+        while currPointer.next:
+            prevPointer = currPointer
+            currPointer = currPointer.next
+        if prevPointer:
+            prevPointer.next = None
+        else:
+            self.head = None
+        self.tail = prevPointer
+        self._size -= 1
+        return currPointer.value
 
     def remove(self, index: int) -> Any:
         """Remove the node at index and return its value. O(n) time, O(1) space."""

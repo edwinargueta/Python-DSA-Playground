@@ -79,7 +79,7 @@ Python-DSA-Playground/
 | Structure | Status | Key operations |
 |---|---|---|
 | Binary Search Tree | 🟡 In progress | insert, contains, delete, traversals, height, validation |
-| Linked List | ⚪ Planned | singly and doubly linked, reversal, cycle detection |
+| Linked List | 🟡 In progress  | singly and doubly linked, reversal, cycle detection |
 | Stack & Queue | ⚪ Planned | array- and node-backed, min-stack |
 | Hash Table | ⚪ Planned | separate chaining, open addressing, resize |
 | Heap / Priority Queue | ⚪ Planned | sift up/down, heapify, k-largest |
