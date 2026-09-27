@@ -38,45 +38,77 @@ class LinkedStack:
 
     def push(self, value: Any) -> None:
         """Add value to the top. O(1) time, O(1) space."""
-        raise NotImplementedError
+        new_node = Node(value)
+        new_node.next = self._top
+        self._top = new_node
+        self._size += 1
 
     # --- removing --------------------------------------------------------
 
     def pop(self) -> Any:
         """Remove and return the top; IndexError if empty. O(1) time, O(1) space."""
-        raise NotImplementedError
+        if self._size == 0:
+            raise IndexError("pop from empty stack")
+        temp = self._top
+        self._top = temp.next
+        temp.next = None
+        self._size -= 1
+        return temp.value
 
     def clear(self) -> None:
         """Drop every node, returning to the empty state. O(1) time, O(1) space."""
-        raise NotImplementedError
+        self._top = None
+        self._size = 0
 
     # --- reading ---------------------------------------------------------
 
     def peek(self) -> Any:
         """Return the top; IndexError if empty. O(1) time, O(1) space."""
-        raise NotImplementedError
+        if self._size == 0:
+            raise IndexError("peek from empty stack")
+        return self._top.value
 
     def is_empty(self) -> bool:
         """Return True if the stack holds nothing. O(1) time, O(1) space."""
-        raise NotImplementedError
+        return self._size == 0
 
     def contains(self, value: Any) -> bool:
         """Return True if value is in the stack. O(n) time, O(1) space."""
-        raise NotImplementedError
+        temp = self._top
+        while temp is not None:
+            if temp.value == value:
+                return True
+            temp = temp.next
+        return False
 
     def to_list(self) -> List[Any]:
         """Return the values as a list, top first. O(n) time, O(n) space."""
-        raise NotImplementedError
+        values = []
+        temp = self._top
+        while temp is not None:
+            values.append(temp.value)
+            temp = temp.next
+        return values
 
     def print_stack(self) -> None:
         """Print the values from top to bottom. O(n) time, O(1) space."""
-        raise NotImplementedError
+        temp = self._top
+        while temp is not None:
+            print(temp.value)
+            temp = temp.next
 
     # --- validation ------------------------------------------------------
 
     def is_valid(self) -> bool:
         """Return True if every structural invariant holds. O(n) time, O(1) space."""
-        raise NotImplementedError
+        count = 0
+        temp = self._top
+        while temp is not None:
+            count += 1
+            if count > self._size:
+                return False
+            temp = temp.next
+        return count == self._size
 
     # Dunder Helpers
     def __len__(self) -> int:
@@ -87,11 +119,14 @@ class LinkedStack:
 
     def __iter__(self) -> Iterator[Any]:
         """Yield the values top first, walking the nodes directly."""
-        raise NotImplementedError
+        temp = self._top
+        while temp is not None:
+            yield temp.value
+            temp = temp.next
 
     def __repr__(self) -> str:
         """Render as LinkedStack([3, 2, 1]), top first."""
-        raise NotImplementedError
+        return f"LinkedStack({self.to_list()!r})"
 
 
 if __name__ == "__main__":

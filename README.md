@@ -80,7 +80,8 @@ Python-DSA-Playground/
 |---|---|---|
 | Binary Search Tree | 🟡 In progress | insert, contains, delete, traversals, height, validation |
 | Linked List | 🟡 In progress  | singly and doubly linked, reversal, cycle detection |
-| Stack & Queue | 🟡 In progress | array- and node-backed, min-stack |
+| Stack | 🟡 In progress | 🟢 node-backed · array-backed · min-stack |
+| Queue | 🟡 In progress | 🟢 node-backed · array-backed |
 | Hash Table | 🟡 In progress | separate chaining, open addressing, resize |
 | Heap / Priority Queue | ⚪ Planned | sift up/down, heapify, k-largest |
 | Graph | ⚪ Planned | BFS, DFS, topological sort, Dijkstra |
