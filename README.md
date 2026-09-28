@@ -84,7 +84,7 @@ Python-DSA-Playground/
 | Queue | 🟡 In progress | 🟢 node-backed · array-backed |
 | Hash Table | 🟡 In progress | separate chaining, open addressing, resize |
 | Heap / Priority Queue | ⚪ Planned | sift up/down, heapify, k-largest |
-| Graph | ⚪ Planned | BFS, DFS, topological sort, Dijkstra |
+| Graph | 🟡 In progress | BFS, DFS, shortest path, Dijkstra, cycle detection, topological sort |
 | Sorting | ⚪ Planned | merge, quick, heap, counting |
 | Dynamic Programming | ⚪ Planned | memoization vs. tabulation, classic problems |
 
